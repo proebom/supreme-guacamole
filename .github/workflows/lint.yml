@@ -15,24 +15,25 @@ on:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        node-version: [20.12.2]
 
     steps:
-      - uses: actions/checkout@v2
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v3
         with:
-          node-version: '20.11.1'
+          version: '9.0.6'
 
-      - name: Cache .pnpm-store
-        uses: actions/cache@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
         with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+
       - name: Install Dependencies
-        run: npm install -g pnpm && pnpm install
+        run: pnpm install
 
       - name: Run Lint
         run: pnpm all-lint
